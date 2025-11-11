@@ -1,0 +1,44 @@
+.subheader-container {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0px;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.subheader-links {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 6px;
+}
+
+.subheader-item {
+  padding: 0px 35px;
+  font-weight: 600;
+  color: #2a2a2a;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.subheader-item:hover {
+  color: #0070f3;
+}
+
+.subheader-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.subheader-divider::before {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background-color: #000000;
+}
+
+.subheader-aviao {
+  height: 26px;
+  margin-left: 0px;
+}
+

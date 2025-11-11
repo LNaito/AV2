@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+
+body {
+    margin: 0; 
+    font-family: 'Inter', sans-serif; 
+}
+
+.hero-section {
+    width: 100vw;
+    height: 70vh; 
+    min-height: 500px; 
+    margin: 0; 
+    background-image: url('../assets/Fundo.jpg'); 
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: rgba(0, 0, 0, 0.5); 
+    background-blend-mode: overlay; 
+    display: flex;
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    text-align: center;
+    padding: 20px; 
+}
+
+.hero__text-content {
+    max-width: 800px; 
+    color: white; 
+}
+
+.hero__title {
+    font-size: 3.5rem; 
+    font-family: 'Roboto', serif; 
+    font-weight: 700;
+    margin: 0 0 0.5rem 0; 
+    color: white; 
+}
+
+.hero__subtitle {
+    font-size: 1.5rem; 
+    font-family: 'Inter', sans-serif; 
+    font-weight: 300; 
+    color: #ccc; 
+    margin: 0 0 1.5rem 0; 
+    letter-spacing: 1px;
+}
+
+.hero__description p {
+    font-size: 1.1rem; 
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    margin-bottom: 2rem; 
+    color: white;
+}
+
+/* --- BOTÃO --- */
+.hero__cta-button {
+    background-color: #007bff; 
+    color: white; 
+    border: none;
+    width: auto; 
+    padding: 0.9rem 2.2rem; 
+    font-size: 1.1rem; 
+    font-weight: 600;
+    border-radius: 25px; 
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem; 
+    text-decoration: none; 
+    display: inline-block; 
+}
+
+.hero__cta-button:hover {
+    background-color: #0056b3;
+}
+
+/* --- Media Queries (Para responsividade em telas menores) --- */
+
+@media (max-width: 850px) {
+    .hero-section {
+        grid-template-columns: 1fr; 
+        gap: 3rem;
+        padding: 4rem 1.5rem;
+    }
+
+    .hero__text-content {
+        text-align: center; 
+    }
+    
+    .hero__photo-container {
+        order: 1; 
+    }
+    
+    .hero__text-content {
+        order: 2; 
+    }
+}

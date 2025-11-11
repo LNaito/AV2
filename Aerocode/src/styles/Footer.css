@@ -1,0 +1,20 @@
+.footer {
+    background-color: #e0e0e0;
+    padding: 3rem 2rem;
+    width: 100%;
+}
+
+.footer__content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.footer__copyright {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0;
+}

@@ -1,0 +1,42 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  z-index: 1000;
+}
+
+.header__logo {
+  font-family: 'Inter', serif;
+  font-size: 1.2rem;
+  font-style: italic;
+  color: #0461ae;
+}
+
+.header__nav ul {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.header__nav a {
+  text-decoration: none;
+  color: #111;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.header__nav a:hover {
+  color: #555;
+}
+
+.header__nav .active {
+  font-weight: 700;
+}
