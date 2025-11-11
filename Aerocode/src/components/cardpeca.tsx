@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/CardSection.css";
 
-type TipoPeca = "Nacional" | "Importada";
-type StatusPeca = "Pendente" | "Andamento";
+export enum TipoPeca {
+  NACIONAL = "Nacional",
+  IMPORTADA = "Importada",
+}
+
+export enum StatusPeca {
+  EM_PRODUCAO = "Em produção",
+  EM_TRANSPORTE = "Em transporte",
+  PRONTA = "Pronta",
+}
 
 interface Peca {
   id: number;
@@ -13,69 +21,117 @@ interface Peca {
 }
 
 const CardPeca: React.FC = () => {
-  const [pecas, setPecas] = useState<Peca[]>([]);
-  const [nova, setNova] = useState<Peca>({
+  const [pecas, setPecas] = useState<Peca[]>(() => {
+    try {
+      const raw = localStorage.getItem("pecas");
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [formAberto, setFormAberto] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+
+  const [form, setForm] = useState<Peca>({
     id: 0,
     nomePeca: "",
-    tipoP: "Nacional",
+    tipoP: TipoPeca.NACIONAL,
     fornecedor: "",
-    status: "Pendente",
+    status: StatusPeca.EM_PRODUCAO,
   });
-  const [mostrarForm, setMostrarForm] = useState(false);
-  const [editando, setEditando] = useState<number | null>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("pecas");
-    if (saved) setPecas(JSON.parse(saved));
-  }, []);
-
+  // salvar no storage sempre que pecas mudar
   useEffect(() => {
     localStorage.setItem("pecas", JSON.stringify(pecas));
   }, [pecas]);
 
+  const abrirNovo = () => {
+    setForm({
+      id: 0,
+      nomePeca: "",
+      tipoP: TipoPeca.NACIONAL,
+      fornecedor: "",
+      status: StatusPeca.EM_PRODUCAO,
+    });
+    setEditId(null);
+    setFormAberto(true);
+  };
+
   const salvar = () => {
-    if (!nova.nomePeca || !nova.fornecedor) return alert("Preencha todos os campos!");
-    if (editando !== null) {
-      setPecas(pecas.map((p, i) => (i === editando ? nova : p)));
-      setEditando(null);
-    } else {
-      setPecas([...pecas, { ...nova, id: Date.now() }]);
+    if (!form.nomePeca.trim() || !form.fornecedor.trim()) {
+      alert("Preencha o nome e fornecedor da peça.");
+      return;
     }
-    setNova({ id: 0, nomePeca: "", tipoP: "Nacional", fornecedor: "", status: "Pendente" });
-    setMostrarForm(false);
+
+    if (editId !== null) {
+      setPecas(pecas.map((p) => (p.id === editId ? { ...form, id: editId } : p)));
+    } else {
+      setPecas([...pecas, { ...form, id: Date.now() }]);
+    }
+
+    setForm({
+      id: 0,
+      nomePeca: "",
+      tipoP: TipoPeca.NACIONAL,
+      fornecedor: "",
+      status: StatusPeca.EM_PRODUCAO,
+    });
+    setEditId(null);
+    setFormAberto(false);
   };
 
-  const editar = (i: number) => {
-    setNova(pecas[i]);
-    setEditando(i);
-    setMostrarForm(true);
+  const editar = (id: number) => {
+    const p = pecas.find((x) => x.id === id);
+    if (!p) return;
+    setForm(p);
+    setEditId(id);
+    setFormAberto(true);
   };
 
-  const deletar = (i: number) => setPecas(pecas.filter((_, idx) => idx !== i));
+  const excluir = (id: number) => {
+    if (!window.confirm("Confirma exclusão desta peça?")) return;
+    setPecas(pecas.filter((p) => p.id !== id));
+  };
 
   return (
     <section className="card-section">
       <div className="card-header">
         <h2>Gerenciar Peças</h2>
-        <button className="botao-criar" onClick={() => setMostrarForm(!mostrarForm)}>
+        <button className="botao-criar" onClick={abrirNovo}>
           + Criar
         </button>
       </div>
 
-      {mostrarForm && (
+      {formAberto && (
         <div className="etapa-form">
-          <input placeholder="Nome da Peça" value={nova.nomePeca} onChange={(e) => setNova({ ...nova, nomePeca: e.target.value })} />
-          <select value={nova.tipoP} onChange={(e) => setNova({ ...nova, tipoP: e.target.value as TipoPeca })}>
-            <option value="Nacional">Nacional</option>
-            <option value="Importada">Importada</option>
+          <input
+            placeholder="Nome da peça"
+            value={form.nomePeca}
+            onChange={(e) => setForm({ ...form, nomePeca: e.target.value })}
+          />
+          <select
+            value={form.tipoP}
+            onChange={(e) => setForm({ ...form, tipoP: e.target.value as TipoPeca })}
+          >
+            <option value={TipoPeca.NACIONAL}>Nacional</option>
+            <option value={TipoPeca.IMPORTADA}>Importada</option>
           </select>
-          <input placeholder="Fornecedor" value={nova.fornecedor} onChange={(e) => setNova({ ...nova, fornecedor: e.target.value })} />
-          <select value={nova.status} onChange={(e) => setNova({ ...nova, status: e.target.value as StatusPeca })}>
-            <option value="Pendente">Pendente</option>
-            <option value="Andamento">Andamento</option>
+          <input
+            placeholder="Fornecedor"
+            value={form.fornecedor}
+            onChange={(e) => setForm({ ...form, fornecedor: e.target.value })}
+          />
+          <select
+            value={form.status}
+            onChange={(e) => setForm({ ...form, status: e.target.value as StatusPeca })}
+          >
+            <option value={StatusPeca.EM_PRODUCAO}>Em produção</option>
+            <option value={StatusPeca.EM_TRANSPORTE}>Em transporte</option>
+            <option value={StatusPeca.PRONTA}>Pronta</option>
           </select>
           <button className="botao-criar" onClick={salvar}>
-            Salvar
+            {editId !== null ? "Salvar alterações" : "Salvar"}
           </button>
         </div>
       )}
@@ -84,15 +140,15 @@ const CardPeca: React.FC = () => {
         {pecas.length === 0 ? (
           <p className="sem-etapas">Nenhuma peça cadastrada.</p>
         ) : (
-          pecas.map((p, i) => (
+          pecas.map((p) => (
             <div key={p.id} className="etapa-card">
               <h3>{p.nomePeca}</h3>
               <p>Tipo: {p.tipoP}</p>
               <p>Fornecedor: {p.fornecedor}</p>
               <p>Status: {p.status}</p>
               <div className="botoes-card">
-                <button onClick={() => editar(i)}>Editar</button>
-                <button onClick={() => deletar(i)}>Excluir</button>
+                <button onClick={() => editar(p.id)}>Editar</button>
+                <button onClick={() => excluir(p.id)}>Excluir</button>
               </div>
             </div>
           ))

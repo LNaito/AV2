@@ -14,7 +14,11 @@ interface EtapaData {
 }
 
 const CardEtapa: React.FC = () => {
-  const [etapas, setEtapas] = useState<EtapaData[]>([]);
+  const [etapas, setEtapas] = useState<EtapaData[]>(() => {
+    const saved = localStorage.getItem("etapas");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [novaEtapa, setNovaEtapa] = useState({
     id: 0,
     nome: "",
@@ -24,18 +28,10 @@ const CardEtapa: React.FC = () => {
   const [formAberto, setFormAberto] = useState(false);
   const [editando, setEditando] = useState<number | null>(null);
 
-  // 🔹 Carrega do localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("etapas");
-    if (saved) setEtapas(JSON.parse(saved));
-  }, []);
-
-  // 🔹 Salva no localStorage
   useEffect(() => {
     localStorage.setItem("etapas", JSON.stringify(etapas));
   }, [etapas]);
 
-  // 🔹 Cria ou edita etapa
   const salvarEtapa = () => {
     if (!novaEtapa.nome || !novaEtapa.prazo) {
       alert("Preencha todos os campos!");
@@ -53,14 +49,12 @@ const CardEtapa: React.FC = () => {
     setFormAberto(false);
   };
 
-  // 🔹 Editar etapa
   const editarEtapa = (index: number) => {
     setNovaEtapa(etapas[index]);
     setEditando(index);
     setFormAberto(true);
   };
 
-  // 🔹 Excluir etapa
   const excluirEtapa = (index: number) => {
     setEtapas(etapas.filter((_, i) => i !== index));
   };

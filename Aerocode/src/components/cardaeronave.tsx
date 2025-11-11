@@ -3,91 +3,123 @@ import "../styles/CardSection.css";
 
 interface Aeronave {
   id: number;
-  codigo: string;
   modelo: string;
-  tipo: string;
+  tipoA: "Comercial" | "Militar";
   capacidade: number;
   alcance: number;
+  etapas: string[];
+  pecas: string[];
 }
 
 const CardAeronave: React.FC = () => {
-  const [aeronaves, setAeronaves] = useState<Aeronave[]>([]);
-  const [nova, setNova] = useState<Aeronave>({
+  const [aeronaves, setAeronaves] = useState<Aeronave[]>(() => {
+    const saved = localStorage.getItem("aeronaves");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [novaAeronave, setNovaAeronave] = useState<Aeronave>({
     id: 0,
-    codigo: "",
     modelo: "",
-    tipo: "",
+    tipoA: "Comercial",
     capacidade: 0,
     alcance: 0,
+    etapas: [],
+    pecas: [],
   });
-  const [mostrarForm, setMostrarForm] = useState(false);
-  const [editando, setEditando] = useState<number | null>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("aeronaves");
-    if (saved) setAeronaves(JSON.parse(saved));
-  }, []);
+  const [formAberto, setFormAberto] = useState(false);
+  const [editando, setEditando] = useState<number | null>(null);
 
   useEffect(() => {
     localStorage.setItem("aeronaves", JSON.stringify(aeronaves));
   }, [aeronaves]);
 
-  const salvar = () => {
-    if (!nova.codigo || !nova.modelo || !nova.tipo) return alert("Preencha todos os campos!");
+  const salvarAeronave = () => {
+    if (!novaAeronave.modelo || novaAeronave.capacidade <= 0 || novaAeronave.alcance <= 0) {
+      alert("Preencha todos os campos corretamente!");
+      return;
+    }
+
     if (editando !== null) {
-      setAeronaves(aeronaves.map((a, i) => (i === editando ? nova : a)));
+      setAeronaves(aeronaves.map((a, i) => (i === editando ? novaAeronave : a)));
       setEditando(null);
     } else {
-      setAeronaves([...aeronaves, { ...nova, id: Date.now() }]);
+      setAeronaves([...aeronaves, { ...novaAeronave, id: Date.now() }]);
     }
-    setNova({ id: 0, codigo: "", modelo: "", tipo: "", capacidade: 0, alcance: 0 });
-    setMostrarForm(false);
+
+    setNovaAeronave({
+      id: 0,
+      modelo: "",
+      tipoA: "Comercial",
+      capacidade: 0,
+      alcance: 0,
+      etapas: [],
+      pecas: [],
+    });
+    setFormAberto(false);
   };
 
-  const editar = (i: number) => {
-    setNova(aeronaves[i]);
-    setEditando(i);
-    setMostrarForm(true);
+  const editarAeronave = (index: number) => {
+    setNovaAeronave(aeronaves[index]);
+    setEditando(index);
+    setFormAberto(true);
   };
 
-  const deletar = (i: number) => setAeronaves(aeronaves.filter((_, idx) => idx !== i));
+  const excluirAeronave = (index: number) => {
+    setAeronaves(aeronaves.filter((_, i) => i !== index));
+  };
 
   return (
     <section className="card-section">
       <div className="card-header">
         <h2>Gerenciar Aeronaves</h2>
-        <button className="botao-criar" onClick={() => setMostrarForm(!mostrarForm)}>
-          + Criar
-        </button>
+        <button onClick={() => setFormAberto(!formAberto)}>+ Criar</button>
       </div>
 
-      {mostrarForm && (
+      {formAberto && (
         <div className="etapa-form">
-          <input placeholder="Código" value={nova.codigo} onChange={(e) => setNova({ ...nova, codigo: e.target.value })} />
-          <input placeholder="Modelo" value={nova.modelo} onChange={(e) => setNova({ ...nova, modelo: e.target.value })} />
-          <input placeholder="Tipo" value={nova.tipo} onChange={(e) => setNova({ ...nova, tipo: e.target.value })} />
-          <input type="number" placeholder="Capacidade" value={nova.capacidade} onChange={(e) => setNova({ ...nova, capacidade: Number(e.target.value) })} />
-          <input type="number" placeholder="Alcance" value={nova.alcance} onChange={(e) => setNova({ ...nova, alcance: Number(e.target.value) })} />
-          <button className="botao-criar" onClick={salvar}>
-            Salvar
-          </button>
+          <input
+            type="text"
+            placeholder="Modelo"
+            value={novaAeronave.modelo}
+            onChange={(e) => setNovaAeronave({ ...novaAeronave, modelo: e.target.value })}
+          />
+          <select
+            value={novaAeronave.tipoA}
+            onChange={(e) => setNovaAeronave({ ...novaAeronave, tipoA: e.target.value as "Comercial" | "Militar" })}
+          >
+            <option value="Comercial">Comercial</option>
+            <option value="Militar">Militar</option>
+          </select>
+          <input
+            type="number"
+            placeholder="Capacidade"
+            value={novaAeronave.capacidade}
+            onChange={(e) => setNovaAeronave({ ...novaAeronave, capacidade: Number(e.target.value) })}
+          />
+          <input
+            type="number"
+            placeholder="Alcance (km)"
+            value={novaAeronave.alcance}
+            onChange={(e) => setNovaAeronave({ ...novaAeronave, alcance: Number(e.target.value) })}
+          />
+          <button onClick={salvarAeronave}>Salvar</button>
         </div>
       )}
 
       <div className="card-container">
         {aeronaves.length === 0 ? (
-          <p className="sem-etapas">Nenhuma aeronave cadastrada.</p>
+          <p>Nenhuma aeronave cadastrada.</p>
         ) : (
-          aeronaves.map((a, i) => (
-            <div key={a.id} className="etapa-card">
-              <h3>{a.modelo}</h3>
-              <p>Código: {a.codigo}</p>
-              <p>Tipo: {a.tipo}</p>
-              <p>Capacidade: {a.capacidade}</p>
-              <p>Alcance: {a.alcance} km</p>
+          aeronaves.map((aeronave, index) => (
+            <div key={aeronave.id} className="etapa-card">
+              <h3>{aeronave.modelo}</h3>
+              <p>Tipo: {aeronave.tipoA}</p>
+              <p>Capacidade: {aeronave.capacidade}</p>
+              <p>Alcance: {aeronave.alcance} km</p>
               <div className="botoes-card">
-                <button onClick={() => editar(i)}>Editar</button>
-                <button onClick={() => deletar(i)}>Excluir</button>
+                <button onClick={() => editarAeronave(index)}>Editar</button>
+                <button onClick={() => excluirAeronave(index)}>Excluir</button>
               </div>
             </div>
           ))
